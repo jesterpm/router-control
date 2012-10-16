@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<project name="RouterControl" default="build" basedir=".">
+  <path id="project.class.path">
+    <fileset dir="rxtx" includes="**/*.jar"/>
+  </path>
+
+  <target name="javac" description="Compile java source to bytecode">
+    <mkdir dir="build"/>
+    <javac srcdir="src" includes="**" encoding="utf-8"
+        destdir="build"
+        source="1.5" target="1.5" nowarn="true"
+        debug="true" debuglevel="lines,vars,source">
+       <classpath refid="project.class.path"/>
+    </javac>
+    <copy todir="build">
+      <fileset dir="src" excludes="**/*.java"/>
+    </copy>
+  </target>
+
+  <target name="build" depends="javac" description="Build this project" />
+
+  <target name="jar" depends="build" description="Create a jar file">
+    <jar destfile="RouterControl.jar">
+       <fileset dir="build" />
+       <restrict>
+          <archives>
+             <zips>
+                <fileset dir="rxtx" includes="**/*.jar" />
+             </zips>
+         </archives>
+       </restrict>
+       <manifest>
+          <attribute name="Main-Class" value="net.tuschhcm.routercontrol.SwitcherApp" />
+       </manifest>
+    </jar>
+  </target>
+
+  <target name="clean" description="Cleans this project">
+    <delete dir="build" failonerror="false" />
+    <delete file="RouterControl.jar" failonerror="false" />
+  </target>
+
+</project>
