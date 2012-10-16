@@ -3,13 +3,13 @@ package net.tuschhcm.routercontrol.ui;
 public class ConsoleUI implements UserInterface {
 
 	@Override
-	public void addPreset(int number, String name) {
+	public void addPreset(int number, final String name) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void setPresetSelectionAction(Action action) {
+	public void setPresetSelectionAction(final Action action) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -26,10 +26,19 @@ public class ConsoleUI implements UserInterface {
 		
 	}
 
-	@Override
-	public void setControlsLockAction(Action action) {
+    @Override
+	public void setToggleControlLockAction(final Action action) {
 		// TODO Auto-generated method stub
-		
-	}
+    }
 
+    @Override
+    public boolean getControlLockStatus() {
+		// TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public void setControlLockStatus(boolean enabled) {
+		// TODO Auto-generated method stub
+    }
 }

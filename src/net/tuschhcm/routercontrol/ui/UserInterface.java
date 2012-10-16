@@ -26,7 +26,19 @@ public interface UserInterface {
 	/**
 	 * Handle toggling the control lock
 	 */
-	public void setControlsLockAction(final Action action);
+	public void setToggleControlLockAction(final Action action);
+
+    /**
+     * Get the status of the control lock.
+     * @return true if the lock is enabled.
+     */
+    public boolean getControlLockStatus();
+
+    /**
+     * Set the control lock status on the UI.
+     * @param enabled true to set the controls lock.
+     */
+    public void setControlLockStatus(boolean enabled);
 	
 	/**
 	 * Start the user interface.
