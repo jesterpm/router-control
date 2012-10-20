@@ -4,13 +4,18 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+
+import java.text.ParseException;
+
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  * Class to represent a router preset.
  */
 public class Preset {
-    private static final String UNNAMED = "<Unnamed Preset>";
+    private static final String UNNAMED = "";
 
     /**
      * Name of the preset.
@@ -24,56 +29,92 @@ public class Preset {
     private final ArrayList<Integer> mInputs;
 
     /**
-     * Load a preset from the given file.
+     * Load the presets from a given file.
      *
      * @param file The file to load.
-     * @return the Preset object
-     * @throws IllegalArgumentException if the preset can't be loaded.
+     * @return A list of Presets
+     * @throws ParseException if the presets file can't be parsed.
+     * @throws IOException if the file can't be read.
      */
-    public static Preset loadPresetFile(File file) throws IllegalArgumentException {
+    public static Map<Integer, Preset> loadPresetsFile(File file)
+        throws ParseException, IOException {
+        
+        final Map<Integer, Preset> map = new HashMap<Integer, Preset>();
+        final BufferedReader in = new BufferedReader(new FileReader(file));
+
         try {
-            Preset preset = new Preset();
+            int lineno = 0;
+            String line;
 
-            BufferedReader in = new BufferedReader(new FileReader(file));
-            int lineno = 1;
+            while ((line = in.readLine()) != null) {
+                lineno++; // Inc. the line count immediately after the read.
 
-            String line = in.readLine();
-            if (line == null) {
-                throw new IllegalArgumentException("Empty preset file: " + file);
-            }
-
-            // The name is optional and starts with a #
-            if (line.charAt(0) == '#') {
-                preset.mName = line.substring(1).trim();
-                line = in.readLine();
-                lineno++;
-            }
-
-            // Read the inputs.
-            int output = 1;
-            while (line != null && !line.equals("")) {
-                try {
-                    final Integer input = Integer.valueOf(line.trim());
-                    preset.mInputs.add(input);
-                    output++;
-
-                } catch (final NumberFormatException nfe) {
-                    throw new IllegalArgumentException(
-                        String.format("%s: Input set for output %d on line %d is not a number.",
-                                file, output, lineno));
+                line = line.trim();
+                if (line.equals("")) {
+                    continue;
                 }
 
-                line = in.readLine();
-                lineno++;
+                try {
+                    map.put(lineno, Preset.fromString(line.trim()));
+
+                } catch (IllegalArgumentException e) {
+                    throw new ParseException("Malformed preset on line " + lineno
+                            + ": " + e.getMessage(), lineno);
+                }
             }
 
+            return map;
+
+        } finally {
             in.close();
-
-            return preset;
-
-        } catch (final IOException e) {
-            throw new IllegalArgumentException("Could not read " + file, e);
         }
+    }
+
+    /**
+     * Load a preset from a String.
+     * @param line The string to parse.
+     * @return The Preset defined by the string.
+     * @throws IllegalArgumentException if the string is malformed.
+     */
+    public static Preset fromString(String line) {
+        final Preset p = new Preset();
+
+        boolean inInput = false;
+        int start = 0;
+        for (int i = 0; i < line.length(); i++) {
+            char c = line.charAt(i);
+
+            if (inInput && Character.isWhitespace(c)) {
+                // End of current input
+                Integer input = Integer.valueOf(line.substring(start, i));
+                p.mInputs.add(input);
+                inInput = false;
+                start = i + 1;
+
+            } else if (!inInput && c == '#') {
+                // Start comment
+                // Ignore empty comments.
+                if ((i+1) < line.length()) {
+                    p.mName = line.substring(i+1).trim();
+                }
+                break; // end loop
+
+            } else if (Character.isDigit(c)) {
+                inInput = true;
+
+            } else {
+                throw new IllegalArgumentException("Unexpected character '" + c + "' at position "
+                        + (i+1) + ". (inInput = " + inInput +")");
+            }
+        }
+
+        if (inInput) {
+            // One last input at the end of the line.
+            Integer input = Integer.valueOf(line.substring(start));
+            p.mInputs.add(input);
+        }
+
+        return p;
     }
 
     /**
@@ -121,12 +162,12 @@ public class Preset {
      */
     public String toString() {
         String str = "";
-        if (!mName.equals(UNNAMED)) {
-            str = "# " + mName + "\n";
-        }
-
         for (Integer in : mInputs) {
-            str += in + "\n";
+            str += in + " ";
+        }
+        
+        if (!mName.equals(UNNAMED)) {
+            str += "# " + mName;
         }
 
         return str;

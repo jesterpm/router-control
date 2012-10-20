@@ -29,7 +29,7 @@ public class SwitcherApp {
     /**
      * My list of presets.
      */
-    private final Map<Integer, Preset> mPresets;
+    private Map<Integer, Preset> mPresets;
 
     /**
      * Create a switcher app.
@@ -74,23 +74,19 @@ public class SwitcherApp {
 
     private void loadPresets() {
         try {
-            File presetDir = new File("presets");
-            if (!presetDir.isDirectory()) {
-                System.err.println("Could not find presets directory!");
+            final String dir = SwitcherApp.class.getProtectionDomain().
+                getCodeSource().getLocation().getPath();
+            File presets = new File(dir, "presets.txt");
+
+            if (!presets.isFile()) {
+                System.err.println("Could not find presets.txt in " + dir);
                 System.exit(1);
             }
 
-            int i = 1;
-            for (File file : presetDir.listFiles()) {
-                if (file.isFile()) {
-                    Preset p = Preset.loadPresetFile(file);
-                    mPresets.put(i, p);
-                    i++;
-                }
-            }
+            mPresets = Preset.loadPresetsFile(presets);
 
-        } catch (IllegalArgumentException e) {
-            System.err.println("Problem loading preset: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Problem loading preset file: " + e.getMessage());
             System.exit(1);
         }
     }
