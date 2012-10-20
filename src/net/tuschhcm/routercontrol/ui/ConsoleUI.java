@@ -47,7 +47,7 @@ public class ConsoleUI implements UserInterface {
         
         
         	if(userInput.equalsIgnoreCase("exit")){
-            	//TODO: Implement and call exit method from switcherApp
+            	running = false;
            
             } else if(userInput.equalsIgnoreCase("lock")){
             	mLocked = !mLocked;
