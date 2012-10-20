@@ -67,6 +67,9 @@ public class SwitcherApp {
         }
 
         mUI.run();
+
+        // All done!
+        mRouter.close();
     }
 
     private void loadPresets() {

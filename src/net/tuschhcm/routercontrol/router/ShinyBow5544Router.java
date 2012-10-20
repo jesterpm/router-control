@@ -1,10 +1,18 @@
 package net.tuschhcm.routercontrol.router;
 
+import java.io.PrintStream;
+
+import gnu.io.CommPortIdentifier;
+import gnu.io.SerialPort;
+
 /**
  * Router implementation for a ShinyBow SB-5544
  * 
  */
 public class ShinyBow5544Router implements Router {
+
+    private final SerialPort mSerialPort;
+    private final PrintStream mOut;
 
     /**
      * Create a new ShinyBow router using the given comm port.
@@ -12,23 +20,60 @@ public class ShinyBow5544Router implements Router {
      * @param portName Com port name
      */
     public ShinyBow5544Router(final String portName) {
-        
+        try {
+            CommPortIdentifier portId = CommPortIdentifier.getPortIdentifier(portName);
+            
+            // 9600 baud, 8 bit, no parity, 1 stop bit
+            mSerialPort = (SerialPort) portId.open("routercontrol", 1000);
+            mSerialPort.setSerialPortParams(9600,
+                                            SerialPort.DATABITS_8,
+                                            SerialPort.STOPBITS_1,
+                                            SerialPort.PARITY_NONE);
+
+            mOut = new PrintStream(mSerialPort.getOutputStream());
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Unable to open serial port: " + e.getMessage(), e);
+        }
     }
     
     @Override
     public void switchInput(int output, int input)
             throws IllegalArgumentException {
-        System.out.println(">>> Switching output " + output + " to " + input); 
+        if (output < 1 || output > 4) {
+           throw new IllegalArgumentException("Invalid Output");
+        }
+
+        if (input < 1 || input > 4) {
+           throw new IllegalArgumentException("Invalid Input");
+        } 
+
+
+        mOut.format("SBI0%dO0%d", output, input);
     }
 
     @Override
     public void setPower(boolean on) {
-        System.out.println(">>> Setting power to " + on); 
+        if (on) {
+            mOut.print("SBSYSMON");
+
+        } else {
+            mOut.print("SBSYSMOF");
+        }
     }
 
     @Override
     public void setLockControls(boolean enabled) {
-       System.out.println(">>> Setting control lock to " + enabled); 
-    }
+        if (enabled) {
+            mOut.print("SBSYSMLK");
 
+        } else {
+            mOut.print("SBSYSMUK");
+        }
+    }
+    
+    @Override
+    public void close() {
+        mOut.close();
+        mSerialPort.close();
+    }
 }

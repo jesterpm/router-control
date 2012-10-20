@@ -26,4 +26,9 @@ public interface Router {
      * @param enabled true to disable the controls.
      */
     public void setLockControls(boolean enabled);
+
+    /**
+     * Close communications with the router.
+     */
+    public void close();
 }
