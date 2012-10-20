@@ -74,12 +74,10 @@ public class SwitcherApp {
 
     private void loadPresets() {
         try {
-            final String dir = SwitcherApp.class.getProtectionDomain().
-                getCodeSource().getLocation().getPath();
-            File presets = new File(dir, "presets.txt");
+            File presets = new File("presets.txt");
 
             if (!presets.isFile()) {
-                System.err.println("Could not find presets.txt in " + dir);
+                System.err.println("Could not find presets.txt in current directory.");
                 System.exit(1);
             }
 
