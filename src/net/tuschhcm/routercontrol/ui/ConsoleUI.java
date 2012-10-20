@@ -37,7 +37,7 @@ public class ConsoleUI implements UserInterface {
     	
     	System.out.println("Welcome to Router Control!");
         System.out.println("--------------------------");
-        System.out.println("Available commands: \nLock: Locks/unlocks the physical controls" +
+        System.out.println("Available commands: \nLock: Locks/unlocks the physical controls " +
         		"on the router\nExit: Exits the application");
         
         do{
