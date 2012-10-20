@@ -26,20 +26,20 @@ public class Preset {
     /**
      * Load a preset from the given file.
      *
-     * @param filename The file to load.
+     * @param file The file to load.
      * @return the Preset object
      * @throws IllegalArgumentException if the preset can't be loaded.
      */
-    public static Preset loadPresetFile(String filename) throws IllegalArgumentException {
+    public static Preset loadPresetFile(File file) throws IllegalArgumentException {
         try {
             Preset preset = new Preset();
 
-            BufferedReader in = new BufferedReader(new FileReader(filename));
+            BufferedReader in = new BufferedReader(new FileReader(file));
             int lineno = 1;
 
             String line = in.readLine();
             if (line == null) {
-                throw new IllegalArgumentException("Empty preset file: " + filename);
+                throw new IllegalArgumentException("Empty preset file: " + file);
             }
 
             // The name is optional and starts with a #
@@ -60,7 +60,7 @@ public class Preset {
                 } catch (final NumberFormatException nfe) {
                     throw new IllegalArgumentException(
                         String.format("%s: Input set for output %d on line %d is not a number.",
-                                filename, output, lineno));
+                                file, output, lineno));
                 }
 
                 line = in.readLine();
@@ -72,7 +72,7 @@ public class Preset {
             return preset;
 
         } catch (final IOException e) {
-            throw new IllegalArgumentException("Could not read " + filename, e);
+            throw new IllegalArgumentException("Could not read " + file, e);
         }
     }
 
