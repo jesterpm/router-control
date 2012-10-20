@@ -1,7 +1,17 @@
 package net.tuschhcm.routercontrol.ui;
 
+import java.util.Scanner;
+
 public class ConsoleUI implements UserInterface {
 
+	private Action mPresetSelectedAction;
+	
+	private Action mLockSetAction;
+	
+	private boolean mLocked;
+	
+	private int mLastPreset;
+	
     @Override
     public void addPreset(int number, final String name) {
         // TODO Auto-generated method stub
@@ -10,35 +20,69 @@ public class ConsoleUI implements UserInterface {
 
     @Override
     public void setPresetSelectionAction(final Action action) {
-        // TODO Auto-generated method stub
-        
+    	mPresetSelectedAction = action;
     }
 
     @Override
     public int getSelectedPreset() {
-        // TODO Auto-generated method stub
-        return 0;
+        return mLastPreset;
     }
 
     @Override
     public void run() {
-        // TODO Auto-generated method stub
         
+    	Scanner keyboard = new Scanner(System.in);
+    	String userInput;
+    	boolean running = true;
+    	
+    	System.out.println("Welcome to Router Control!");
+        System.out.println("--------------------------");
+        System.out.println("Available commands: \nLock: Locks/unlocks the physical controls" +
+        		"on the router\nExit: Exits the application");
+        
+        do{
+        
+        	System.out.print("\nEnter a command or preset number: ");
+        	userInput = keyboard.next();
+        
+        
+        	if(userInput.equalsIgnoreCase("exit")){
+            	//TODO: Implement and call exit method from switcherApp
+           
+            } else if(userInput.equalsIgnoreCase("lock")){
+            	mLocked = !mLocked;
+            	mLockSetAction.onAction();
+            	if(mLocked){
+            		System.out.println("Physical Controls are Locked.");
+            	} else {
+            		System.out.println("Physical Controls are Unlocked");
+            	}
+            
+            } else {
+            	try{
+            		mLastPreset = Integer.valueOf(userInput);
+            		mPresetSelectedAction.onAction();
+            	} catch (final NumberFormatException nfe){
+            		System.out.println("ERROR: Invalid Entry");
+            	}
+            }
+        }while(running);
+        
+       keyboard.close();
     }
 
     @Override
     public void setToggleControlLockAction(final Action action) {
-        // TODO Auto-generated method stub
+        mLockSetAction = action;
     }
 
     @Override
     public boolean getControlLockStatus() {
-        // TODO Auto-generated method stub
-        return false;
+        return mLocked;
     }
 
     @Override
     public void setControlLockStatus(boolean enabled) {
-        // TODO Auto-generated method stub
+        mLocked = enabled;
     }
 }
