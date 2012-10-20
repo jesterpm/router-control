@@ -10,7 +10,8 @@ import gnu.io.SerialPort;
  * 
  */
 public class ShinyBow5544Router implements Router {
-
+	private static final int MSG_DELAY = 50;
+	
     private final SerialPort mSerialPort;
     private final PrintStream mOut;
 
@@ -24,7 +25,7 @@ public class ShinyBow5544Router implements Router {
             CommPortIdentifier portId = CommPortIdentifier.getPortIdentifier(portName);
             
             // 9600 baud, 8 bit, no parity, 1 stop bit
-            mSerialPort = (SerialPort) portId.open("routercontrol", 1000);
+            mSerialPort = (SerialPort) portId.open("routercontrol", 100);
             mSerialPort.setSerialPortParams(9600,
                                             SerialPort.DATABITS_8,
                                             SerialPort.STOPBITS_1,
@@ -48,7 +49,13 @@ public class ShinyBow5544Router implements Router {
         } 
 
 
-        mOut.format("SBI0%dO0%d", output, input);
+        mOut.format("SBI0%dO0%d", input, output);
+        try {
+        	Thread.sleep(MSG_DELAY);
+        	
+        } catch (InterruptedException e) {
+        	// ignore
+        }
     }
 
     @Override
@@ -59,6 +66,13 @@ public class ShinyBow5544Router implements Router {
         } else {
             mOut.print("SBSYSMOF");
         }
+        
+        try {
+        	Thread.sleep(MSG_DELAY);
+        	
+        } catch (InterruptedException e) {
+        	// ignore
+        }
     }
 
     @Override
@@ -68,6 +82,13 @@ public class ShinyBow5544Router implements Router {
 
         } else {
             mOut.print("SBSYSMUK");
+        }
+        
+        try {
+        	Thread.sleep(MSG_DELAY);
+        	
+        } catch (InterruptedException e) {
+        	// ignore
         }
     }
     
