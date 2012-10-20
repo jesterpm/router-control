@@ -106,7 +106,7 @@ public class Preset {
             throw new IllegalArgumentException("Output out of range.");
         }
 
-        return mInputs.get(output);
+        return mInputs.get(index);
     }
 
     /**

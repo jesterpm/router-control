@@ -18,20 +18,17 @@ public class ShinyBow5544Router implements Router {
     @Override
     public void switchInput(int output, int input)
             throws IllegalArgumentException {
-        // TODO Auto-generated method stub
-        
+        System.out.println(">>> Switching output " + output + " to " + input); 
     }
 
     @Override
     public void setPower(boolean on) {
-        // TODO Auto-generated method stub
-        
+        System.out.println(">>> Setting power to " + on); 
     }
 
     @Override
     public void setLockControls(boolean enabled) {
-        // TODO Auto-generated method stub
-        
+       System.out.println(">>> Setting control lock to " + enabled); 
     }
 
 }
