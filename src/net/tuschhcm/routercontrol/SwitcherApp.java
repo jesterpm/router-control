@@ -1,5 +1,8 @@
 package net.tuschhcm.routercontrol;
 
+import java.io.File;
+import java.io.IOException;
+
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,17 +20,17 @@ public class SwitcherApp {
      * The router I control.
      */
     private final Router mRouter;
-    
+
     /**
      * My user interface.
      */
     private final UserInterface mUI;
-    
+
     /**
      * My list of presets.
      */
     private final Map<Integer, Preset> mPresets;
-    
+
     /**
      * Create a switcher app.
      * @param portName the port name for the router.
@@ -36,36 +39,75 @@ public class SwitcherApp {
         mUI = new ConsoleUI();
         mRouter = new ShinyBow5544Router(portName);
         mPresets = new HashMap<Integer, Preset>();
-        
+
         // Setup UI actions
         mUI.setPresetSelectionAction(new Action() {
             public void onAction() {
                 handlePresetSelected();
             }
         });
-        
+
         mUI.setToggleControlLockAction(new Action() {
             public void onAction() {
                 handleLockToggled();
             }
         });
     }
-    
+
     /**
      * Start the application.
      */
     public void run() {
-        // TODO: Load the presets
-        // TODO: Send the presets to the UI
+        // Load the presets
+        loadPresets();
+
+        // Send the presets to the UI
+        for (Map.Entry<Integer, Preset> presetEntry : mPresets.entrySet()) {
+            mUI.addPreset(presetEntry.getKey(), presetEntry.getValue().getName());
+        }
+
         mUI.run();
     }
-    
+
+    private void loadPresets() {
+        try {
+            File presetDir = new File("presets");
+            if (!presetDir.isDirectory()) {
+                System.err.println("Could not find presets directory!");
+                System.exit(1);
+            }
+
+            int i = 1;
+            for (File file : presetDir.listFiles()) {
+                if (file.isFile()) {
+                    Preset p = Preset.loadPresetFile(file);
+                    mPresets.put(i, p);
+                    i++;
+                }
+            }
+
+        } catch (IllegalArgumentException e) {
+            System.err.println("Problem loading preset: " + e.getMessage());
+            System.exit(1);
+        }
+    }
+
     /**
      * Handles a preset selection.
      */
     private void handlePresetSelected() {
-        int selectedPreset = mUI.getSelectedPreset();
-        // TODO: What to do when the preset is selected
+        final int selectedPreset = mUI.getSelectedPreset();
+        final Preset p = mPresets.get(selectedPreset);
+
+        if (p == null) {
+            System.err.println(selectedPreset + " is not a preset.");
+            return;
+        }
+
+        // Set all the outputs
+        for (int output = 1; output <= p.getNumberOfOutputs(); output++) {
+            mRouter.switchInput(output, p.getInputForOutput(output));
+        }
     }
 
     /**
@@ -74,7 +116,7 @@ public class SwitcherApp {
     private void handleLockToggled() {
         mRouter.setLockControls(mUI.getControlLockStatus());
     }
-    
+
     /**
      * Entry-point for the application.
      * @param args Command line arguments
@@ -94,22 +136,22 @@ public class SwitcherApp {
         }
 
         String comPort = args[0];
-        
+
         SwitcherApp app = new SwitcherApp(comPort);
         app.run();
     }
 
     private static void listCommPorts() {
         Enumeration ports = CommPortIdentifier.getPortIdentifiers();
-    
+
         if (ports.hasMoreElements()) {
             System.out.println("These ports are available on your system: ");
             while (ports.hasMoreElements()) {
                 CommPortIdentifier port = (CommPortIdentifier) ports.nextElement();
-                if (port.getPortType() == CommPortIdentifier.PORT_SERIAL) {   
+                if (port.getPortType() == CommPortIdentifier.PORT_SERIAL) {
                     System.out.println(port.getName());
                 }
-            } 
+            }
 
         } else {
             System.out.println("There are no serial ports on your system.");
